@@ -10,7 +10,6 @@ var mongoose = require('mongoose');
 
 var isProduction = process.env.NODE_ENV === 'development'
 
-var indexRouter = require('./routes/index');
 
 var app = express();
 
@@ -39,9 +38,9 @@ if (isProduction) {
     console.log('PRod');
     mongoose.connect(process.env.MONGODB_URI)
 } else {
-    console.log('DEv')
+    // console.log('Dev')
     // mongoose.connect("mongodb://localhost/trelloDB", { useNewUrlParser: true });
-    mongoose.connect("mongodb://localhost/trelloDB", {
+    mongoose.connect("mongodb://localhost:27017/trelloDB", {
         useNewUrlParser: true,
         useUnifiedTopology: true
     }, function (err, db) {
@@ -54,10 +53,11 @@ if (isProduction) {
             // db.close();
         }
     })
+
     mongoose.set('debug', true)
 }
 
-
+require('./models/User')
 
 
 app.use(require('./routes'));
