@@ -60,7 +60,7 @@ if (isProduction) {
 require('./models/User');
 require('./models/Team');
 require('./models/Board');
-
+require('./config/passport')
 
 app.use(require('./routes'));
 
