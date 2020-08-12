@@ -50,14 +50,30 @@ TeamSchema.methods.slugify = function () {
 };
 
 TeamSchema.methods.toTeamJSON = function () {
+    let mem = this.members.map(member => member.toProfileJSON());
     return {
         slug: this.slug,
         name: this.name,
-        members: this.members.map(member => member.toProfileJSON()),
+        members: mem,
         owner: this.owner.toProfileJSON(),
         createdAt: this.createdAt,
         updatedAt: this.updatedAt,
 
     };
+};
+TeamSchema.methods.addMember = function (id) {
+    if (this.members.indexOf(id) === -1) {
+        this.members = this.members.concat([id]);
+    }
+    return this.save();
+};
+TeamSchema.methods.removeMember = function (id) {
+    this.members.remove(id);
+    return this.save();
+};
+TeamSchema.methods.isMember = function (id) {
+    return this.members.some(function (memberId) {
+        return memberId.toString() === id.toString();
+    });
 };
 module.exports = mongoose.model("Team", TeamSchema);
