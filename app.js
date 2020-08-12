@@ -36,9 +36,24 @@ if (!isProduction) {
 }
 
 if (isProduction) {
-    mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+    console.log('PRod');
+    mongoose.connect(process.env.MONGODB_URI)
 } else {
-    mongoose.connect('mongodb://localhost/trellodb', { useNewUrlParser: true, useUnifiedTopology: true })
+    console.log('DEv')
+    // mongoose.connect("mongodb://localhost/trelloDB", { useNewUrlParser: true });
+    mongoose.connect("mongodb://localhost/trelloDB", {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }, function (err, db) {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            console.log('connected to ' + "mongodb://localhost:27017/trelloDB");
+            mongoose.set('debug', true)
+            // db.close();
+        }
+    })
     mongoose.set('debug', true)
 }
 
