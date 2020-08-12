@@ -57,7 +57,9 @@ if (isProduction) {
     mongoose.set('debug', true)
 }
 
-require('./models/User')
+require('./models/User');
+require('./models/Team');
+require('./models/Board');
 
 
 app.use(require('./routes'));
