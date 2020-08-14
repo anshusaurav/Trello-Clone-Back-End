@@ -101,7 +101,7 @@ router.post("/", auth.required, function (req, res, next) {
                                     })
                             })
                         }
-                        return res.sendStatus(401);
+                        return res.status(401).send("You don't belong here");
 
                     })
             })
@@ -115,10 +115,127 @@ router.post("/", auth.required, function (req, res, next) {
     })
 });
 
+/**
+ * Get all private boards
+ */
 router.get('/private', auth.required, function (req, res, next) {
+    var limit = 20;
+    var offset = 0;
+    if (typeof req.query.limit !== "undefined") {
+        limit = req.query.limit;
+    }
+
+    if (typeof req.query.offset !== "undefined") {
+        offset = req.query.offset;
+    }
+
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) {
+            return res.sendStatus(401);
+        }
+        Promise.all([
+            Board.find({ owner: user, isPrivate: true })
+                .limit(Number(limit))
+                .skip(Number(offset))
+                .sort({ createdAt: "desc" })
+                .exec(),
+            Board.count({ owner: user._doc._id, isPrivate: true }),
+        ])
+            .then(function (results) {
+                var boards = results[0];
+                var boardCount = results[1];
+                return res.json({
+                    boards: boards.map(function (board) {
+                        return board._doc;
+                    }),
+                    boardCount
+                });
+            })
+            .catch(next);
+    });
 
 })
-router.get('/:slug', auth.required, function (req, res, next) {
 
+/**
+ * Get all boards of particular team's slug
+ */
+router.get('/team/:slug', auth.required, function (req, res, next) {
+    var limit = 20;
+    var offset = 0;
+    const { slug } = req.params;
+    if (typeof req.query.limit !== "undefined") {
+        limit = req.query.limit;
+    }
+
+    if (typeof req.query.offset !== "undefined") {
+        offset = req.query.offset;
+    }
+
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) {
+            return res.sendStatus(401);
+        }
+        Team.findOne({ slug }).then(function (team) {
+            if (!(team.isMember(user) || team.isOwner(user)))
+                return res.status(401).send("You don't belong here");
+            Promise.all([
+                Board.find({ team: team._id })
+                    .limit(Number(limit))
+                    .skip(Number(offset))
+                    .sort({ createdAt: "desc" })
+                    .populate({
+                        path: 'team',
+                        populate: {
+                            path: 'members owner',
+                            select: '-salt -__v -hash'
+                        }
+                    })
+                    .exec(),
+                Board.count({ team }),
+            ])
+                .then(function (results) {
+                    var boards = results[0];
+                    var boardCount = results[1];
+                    return res.json({
+                        boards: boards.map(function (board) {
+                            return board._doc;
+                        }),
+                        boardCount
+                    });
+                })
+                .catch(next);
+        })
+
+    });
+})
+
+/**
+ * Get single board by slug
+ */
+router.get('/:slug', auth.required, function (req, res, next) {
+    const { slug } = req.params;
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) {
+            return res.sendStatus(401);
+        }
+        return Board.findOne({ slug: slug }).then(function (board) {
+            board.populate({
+                path: 'owner',
+                selct: '-salt -__v -hash'
+            })
+                .populate({
+                    path: 'team',
+                    populate: {
+                        path: 'members owner',
+                        select: '-salt -__v -hash'
+                    }
+                })
+                .execPopulate()
+                .then(function (team) {
+                    return res.json({ board: board._doc });
+                });
+        });
+
+    })
 })
 module.exports = router
