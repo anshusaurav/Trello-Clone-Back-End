@@ -20,19 +20,14 @@ var BoardSchema = new mongoose.Schema(
             type: Boolean,
             default: true
         },
-        teamId: {
+        team: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Team"
         },
         image: {
             type: String
         },
-        members: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'User'
-            }
-        ],
+
     },
     { timestamps: true }
 )
@@ -49,5 +44,19 @@ BoardSchema.methods.slugify = function () {
         slug(this.name) +
         "-" +
         ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
+};
+BoardSchema.methods.toBoardJSON = function () {
+    // let mem = this.members.map(member => member.toProfileJSON());
+    return {
+        id: this._id,
+        slug: this.slug,
+        name: this.name,
+        owner: this.owner.toProfileJSON(),
+        isPrivate: this.isPrivate,
+        team: this.isPrivate ? undefined : this.team.toTeamJSON(),
+        updatedAt: this.updatedAt,
+        createdAt: this.createdAt
+
+    };
 };
 module.exports = mongoose.model("Board", BoardSchema);

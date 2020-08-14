@@ -73,7 +73,27 @@ TeamSchema.methods.removeMember = function (id) {
 };
 TeamSchema.methods.isMember = function (id) {
     return this.members.some(function (memberId) {
+
         return memberId.toString() === id.toString();
-    });
+    })
 };
+TeamSchema.methods.isOwner = function (id) {
+    return this.owner.toString() === id._id.toString();
+}
+TeamSchema.methods.addBoard = function (id) {
+    if (this.boards.indexOf(id) === -1) {
+        this.boards = this.boards.concat([id]);
+    }
+    return this.save();
+}
+TeamSchema.methods.removeBoard = function (id) {
+    this.boards.remove(id);
+    return this.save();
+}
+
+TeamSchema.methods.containsBoard = function (id) {
+    return this.boards.some(function (boardId) {
+        return boardId.toString() === id.toString();
+    })
+}
 module.exports = mongoose.model("Team", TeamSchema);

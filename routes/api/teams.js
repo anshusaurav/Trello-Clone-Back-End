@@ -107,7 +107,6 @@ router.post("/", auth.required, function (req, res, next) {
         if (!user) {
             return res.sendStatus(401);
         }
-        console.log(user);
         var team = new Team({
             name: req.body.team.name,
         })
@@ -126,6 +125,9 @@ router.post("/:slug/add", auth.required, function (req, res, next) {
             return res.sendStatus(401);
         }
         return User.findOne({ email }).then(function (userM) {
+            if (!userM) {
+                return res.status(401).send(`No user with ${email}`);
+            }
             return Team.findOne({ slug: slug }).then(function (team) {
                 if (!team) {
                     return res.sendStatus(401);
@@ -205,18 +207,17 @@ router.delete("/:slug", auth.required, function (req, res, next) {
     const { slug } = req.params;
     Promise.resolve(req.payload ? User.findById(req.payload.id) : null)
         .then(function (user) {
-            Team.findOne({ slug: slug }).then(function (team) {
+            Team.findOne({ slug }).then(function (team) {
+                console.log(team)
                 team.populate("owner")
                     .populate("members")
                     .populate("boards")
                     .execPopulate()
                     .then(function (team) {
                         if (team.owner._id.toString() === user.id.toString()) {
-                            console.log("Verified");
-                            imagepost.remove().then(function () {
-                                user.removeImagePost(imagepost._id).then(function () {
-                                    return res.json({ imagepost: imagepost.toJSONFor(user) });
-                                });
+                            team.remove().then(function () {
+                                return res.json({ team: team.toTeamJSON() });
+
                             });
                         } else {
                             return res.sendStatus(403);
