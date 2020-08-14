@@ -74,7 +74,7 @@ TeamSchema.methods.removeMember = function (id) {
 TeamSchema.methods.isMember = function (id) {
     return this.members.some(function (memberId) {
 
-        return memberId.toString() === id.toString();
+        return memberId.toString() === id._id.toString();
     })
 };
 TeamSchema.methods.isOwner = function (id) {

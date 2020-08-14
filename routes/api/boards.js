@@ -176,6 +176,9 @@ router.get('/team/:slug', auth.required, function (req, res, next) {
             return res.sendStatus(401);
         }
         Team.findOne({ slug }).then(function (team) {
+            console.log(user._doc.username);
+            if (!team)
+                return res.status(401).send("No such team found");
             if (!(team.isMember(user) || team.isOwner(user)))
                 return res.status(401).send("You don't belong here");
             Promise.all([
@@ -237,5 +240,37 @@ router.get('/:slug', auth.required, function (req, res, next) {
         });
 
     })
+})
+
+
+/**
+ * Delete board by slug
+ * 
+ */
+
+router.delete("/:slug", auth.required, function (req, res, next) {
+    const { slug } = req.params;
+    Promise.resolve(req.payload ? User.findById(req.payload.id) : null)
+        .then(function (user) {
+            Team.findOne({ slug }).then(function (team) {
+                console.log(team)
+                team.populate("owner")
+                    .populate("members")
+                    .populate("boards")
+                    .execPopulate()
+                    .then(function (team) {
+                        if (team.owner._id.toString() === user.id.toString()) {
+                            team.remove().then(function () {
+                                return res.json({ team: team.toTeamJSON() });
+
+                            });
+                        } else {
+                            return res.sendStatus(403);
+                        }
+                    });
+            });
+        })
+
+        .catch(next);
 })
 module.exports = router
