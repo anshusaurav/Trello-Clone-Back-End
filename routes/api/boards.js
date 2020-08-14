@@ -116,7 +116,7 @@ router.post("/", auth.required, function (req, res, next) {
 });
 
 /**
- * Get all private boards
+ * Get all private boards for loggedin user
  */
 router.get('/private', auth.required, function (req, res, next) {
     var limit = 20;
@@ -157,7 +157,8 @@ router.get('/private', auth.required, function (req, res, next) {
 })
 
 /**
- * Get all boards of particular team's slug
+ * Get all boards of particular team's slug if user is member or owner of that 
+ * team
  */
 router.get('/team/:slug', auth.required, function (req, res, next) {
     var limit = 20;
@@ -252,22 +253,16 @@ router.delete("/:slug", auth.required, function (req, res, next) {
     const { slug } = req.params;
     Promise.resolve(req.payload ? User.findById(req.payload.id) : null)
         .then(function (user) {
-            Team.findOne({ slug }).then(function (team) {
-                console.log(team)
-                team.populate("owner")
-                    .populate("members")
-                    .populate("boards")
-                    .execPopulate()
-                    .then(function (team) {
-                        if (team.owner._id.toString() === user.id.toString()) {
-                            team.remove().then(function () {
-                                return res.json({ team: team.toTeamJSON() });
-
-                            });
-                        } else {
-                            return res.sendStatus(403);
-                        }
+            Board.findOne({ slug }).then(function (board) {
+                if (!board)
+                    return res.status(401).send("No such board found");
+                if (board.owner._id.toString() === user.id.toString()) {
+                    board.remove().then(function () {
+                        return res.json({ board: board._doc });
                     });
+                } else {
+                    return res.status(401).send("You don't belong here");
+                }
             });
         })
 
