@@ -183,7 +183,7 @@ router.get('/team/:slug', auth.required, function (req, res, next) {
             if (!(team.isMember(user) || team.isOwner(user)))
                 return res.status(401).send("You don't belong here");
             Promise.all([
-                Board.find({ team: team._id })
+                Board.find({ team })
                     .limit(Number(limit))
                     .skip(Number(offset))
                     .sort({ createdAt: "desc" })
@@ -225,7 +225,7 @@ router.get('/:slug', auth.required, function (req, res, next) {
         return Board.findOne({ slug: slug }).then(function (board) {
             board.populate({
                 path: 'owner',
-                selct: '-salt -__v -hash'
+                select: '-salt -__v -hash'
             })
                 .populate({
                     path: 'team',
@@ -235,8 +235,8 @@ router.get('/:slug', auth.required, function (req, res, next) {
                     }
                 })
                 .execPopulate()
-                .then(function (team) {
-                    return res.json({ board: board._doc });
+                .then(function (board) {
+                    return res.json({ board });
                 });
         });
 

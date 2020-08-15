@@ -109,6 +109,8 @@ router.post("/", auth.required, function (req, res, next) {
         }
         var team = new Team({
             name: req.body.team.name,
+            description: req.body.team.description
+
         })
         team.owner = user;
         return team.save().then(function () {

@@ -14,6 +14,9 @@ var TeamSchema = new mongoose.Schema(
             required: [true, "can't be blank"],
             index: true,
         },
+        description: {
+            type: String,
+        },
         owner: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
@@ -54,6 +57,7 @@ TeamSchema.methods.toTeamJSON = function () {
     return {
         slug: this.slug,
         name: this.name,
+        description: this.description,
         members: mem,
         owner: this.owner.toProfileJSON(),
         createdAt: this.createdAt,
