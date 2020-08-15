@@ -60,6 +60,8 @@ if (isProduction) {
 require('./models/User');
 require('./models/Team');
 require('./models/Board');
+require('./models/List')
+require('./models/Issue')
 require('./config/passport')
 
 app.use(require('./routes'));

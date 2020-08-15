@@ -14,7 +14,7 @@ var ListSchema = new mongoose.Schema(
         },
         board: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+            ref: 'Board'
         },
         issues: [
             {
@@ -22,8 +22,6 @@ var ListSchema = new mongoose.Schema(
                 ref: 'Issue'
             }
         ]
-
-
     },
     { timestamps: true }
 )
@@ -31,7 +29,6 @@ ListSchema.pre("validate", function (next) {
     if (!this.slug) {
         this.slugify();
     }
-
     next();
 });
 
@@ -41,6 +38,9 @@ ListSchema.methods.slugify = function () {
         "-" +
         ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
 };
+// ListSchema.methods.moveIssue = function(start, end){
+
+// }
 ListSchema.methods.toListJSON = function () {
     // let mem = this.members.map(member => member.toProfileJSON());
     return {
