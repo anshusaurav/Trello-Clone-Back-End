@@ -4,6 +4,7 @@ var util = require("util")
 var User = mongoose.model("User");
 var Team = mongoose.model("Team");
 var Board = mongoose.model("Board");
+var Issue = mongoose.model("Issue");
 var auth = require("../auth");
 router.param("boards", function (req, res, next, slug) {
     Board.findOne({ slug })
