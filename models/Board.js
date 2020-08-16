@@ -69,6 +69,10 @@ BoardSchema.methods.contains = function (id) {
     })
 };
 
+BoardSchema.methods.isOwner = function (id) {
+    return this.owner.toString() === id.toString();
+}
+
 BoardSchema.methods.toBoardJSON = function () {
     // let mem = this.members.map(member => member.toProfileJSON());
     return {

@@ -55,6 +55,7 @@ TeamSchema.methods.slugify = function () {
 TeamSchema.methods.toTeamJSON = function () {
     let mem = this.members.map(member => member.toProfileJSON());
     return {
+        id: this.id,
         slug: this.slug,
         name: this.name,
         description: this.description,
@@ -78,11 +79,11 @@ TeamSchema.methods.removeMember = function (id) {
 TeamSchema.methods.isMember = function (id) {
     return this.members.some(function (memberId) {
 
-        return memberId.toString() === id._id.toString();
+        return memberId.toString() === id.toString();
     })
 };
 TeamSchema.methods.isOwner = function (id) {
-    return this.owner.toString() === id._id.toString();
+    return this.owner.toString() === id.toString();
 }
 TeamSchema.methods.addBoard = function (id) {
     if (this.boards.indexOf(id) === -1) {

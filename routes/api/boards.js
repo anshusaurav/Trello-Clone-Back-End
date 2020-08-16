@@ -21,49 +21,49 @@ router.param("boards", function (req, res, next, slug) {
 });
 
 
-router.get('/', auth.required, function (req, res, next) {
-    var limit = 20;
-    var offset = 0;
-    if (typeof req.query.limit !== "undefined") {
-        limit = req.query.limit;
-    }
+// router.get('/', auth.required, function (req, res, next) {
+//     var limit = 20;
+//     var offset = 0;
+//     if (typeof req.query.limit !== "undefined") {
+//         limit = req.query.limit;
+//     }
 
-    if (typeof req.query.offset !== "undefined") {
-        offset = req.query.offset;
-    }
+//     if (typeof req.query.offset !== "undefined") {
+//         offset = req.query.offset;
+//     }
 
-    User.findById(req.payload.id).then(function (user) {
-        if (!user) {
-            return res.sendStatus(401);
-        }
-        Promise.all([
-            Team.find({ owner: user._doc._id })
-                .limit(Number(limit))
-                .skip(Number(offset))
-                .sort({ createdAt: "desc" })
-                .populate("owner")
-                .populate("members")
-                .populate("boards")
-                .exec(),
-            Team.count({ owner: user.id }),
-        ])
-            .then(function (results) {
-                var teams = results[0];
-                var teamCount = results[1];
-                console.log(teams);
-                return res.json({
-                    teams: teams.map(function (team) {
-                        return team.toTeamJSON();
-                    }),
-                    teamCount: teamCount,
-                });
-            })
-            .catch(next);
-    });
-})
+//     User.findById(req.payload.id).then(function (user) {
+//         if (!user) {
+//             return res.sendStatus(401);
+//         }
+//         Promise.all([
+//             Team.find({ owner: user._doc._id })
+//                 .limit(Number(limit))
+//                 .skip(Number(offset))
+//                 .sort({ createdAt: "desc" })
+//                 .populate("owner")
+//                 .populate("members")
+//                 .populate("boards")
+//                 .exec(),
+//             Team.count({ owner: user.id }),
+//         ])
+//             .then(function (results) {
+//                 var teams = results[0];
+//                 var teamCount = results[1];
+//                 console.log(teams);
+//                 return res.json({
+//                     teams: teams.map(function (team) {
+//                         return team.toTeamJSON();
+//                     }),
+//                     teamCount: teamCount,
+//                 });
+//             })
+//             .catch(next);
+//     });
+// })
 /**
- * Board can either be added by member of owner of team for a team
- * All users can create personal boards.
+ * Board can either be added by member or  owner of team for a team
+ * All users can create their personal boards.
  */
 router.post("/", auth.required, function (req, res, next) {
     console.log(req.payload);
@@ -82,7 +82,7 @@ router.post("/", auth.required, function (req, res, next) {
                 team.populate("members")
                     .execPopulate()
                     .then(function (team) {
-                        if (team.isMember(user) || team.isOwner(user)) {
+                        if (team.isMember(user.id) || team.isOwner(user.id)) {
                             board.team = req.body.board.team;
                             return board.save().then(function (board) {
                                 board.populate({
@@ -94,7 +94,8 @@ router.post("/", auth.required, function (req, res, next) {
                                         populate: {
                                             path: 'members owner',
                                             select: '-salt -__v -hash'
-                                        }
+                                        },
+                                        select: '-__v'
                                     })
                                     .execPopulate()
                                     .then(function (board) {
@@ -113,7 +114,7 @@ router.post("/", auth.required, function (req, res, next) {
             })
         }
 
-    })
+    }).catch(next);
 });
 
 /**
@@ -140,7 +141,7 @@ router.get('/private', auth.required, function (req, res, next) {
                 .skip(Number(offset))
                 .sort({ createdAt: "desc" })
                 .exec(),
-            Board.count({ owner: user._doc._id, isPrivate: true }),
+            Board.count({ owner: user, isPrivate: true }),
         ])
             .then(function (results) {
                 var boards = results[0];
@@ -153,7 +154,7 @@ router.get('/private', auth.required, function (req, res, next) {
                 });
             })
             .catch(next);
-    });
+    }).catch(next);
 
 })
 
@@ -181,7 +182,7 @@ router.get('/team/:slug', auth.required, function (req, res, next) {
             console.log(user._doc.username);
             if (!team)
                 return res.status(401).send("No such team found");
-            if (!(team.isMember(user) || team.isOwner(user)))
+            if (!(team.isMember(user.id) || team.isOwner(user.id)))
                 return res.status(401).send("You don't belong here");
             Promise.all([
                 Board.find({ team })
@@ -193,7 +194,8 @@ router.get('/team/:slug', auth.required, function (req, res, next) {
                         populate: {
                             path: 'members owner',
                             select: '-salt -__v -hash'
-                        }
+                        },
+                        select: '-__v'
                     })
                     .exec(),
                 Board.count({ team }),
@@ -211,7 +213,7 @@ router.get('/team/:slug', auth.required, function (req, res, next) {
                 .catch(next);
         })
 
-    });
+    }).catch(next);
 })
 
 /**
@@ -223,7 +225,9 @@ router.get('/:slug', auth.required, function (req, res, next) {
         if (!user) {
             return res.sendStatus(401);
         }
-        return Board.findOne({ slug: slug }).then(function (board) {
+        console.log(user.username, slug)
+        return Board.findOne({ slug }).then(function (board) {
+            console.log(board._doc);
             board.populate({
                 path: 'owner',
                 select: '-salt -__v -hash'
@@ -233,7 +237,8 @@ router.get('/:slug', auth.required, function (req, res, next) {
                     populate: {
                         path: 'members owner',
                         select: '-salt -__v -hash'
-                    }
+                    },
+                    select: '-__v'
                 })
                 .execPopulate()
                 .then(function (board) {
@@ -241,7 +246,7 @@ router.get('/:slug', auth.required, function (req, res, next) {
                 });
         });
 
-    })
+    }).catch(next);
 })
 
 
