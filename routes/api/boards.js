@@ -153,7 +153,6 @@ router.get('/private', auth.required, function (req, res, next) {
                     boardCount
                 });
             })
-            .catch(next);
     }).catch(next);
 
 })
@@ -210,7 +209,6 @@ router.get('/team/:slug', auth.required, function (req, res, next) {
                         boardCount
                     });
                 })
-                .catch(next);
         })
 
     }).catch(next);
@@ -271,7 +269,6 @@ router.delete("/:slug", auth.required, function (req, res, next) {
                 }
             });
         })
-
         .catch(next);
 })
 module.exports = router
