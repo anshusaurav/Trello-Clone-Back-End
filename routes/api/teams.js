@@ -15,9 +15,50 @@ router.param("teams", function (req, res, next, slug) {
         .catch(next);
 });
 
-//author= owner
-//favorited = member
-//http://localhost:4000/api/p?owner=${loggedInUser.username}&offset=${offset}&limit=${limit}`,
+/**
+ * Get all team of current user
+ */
+router.get('/', auth.required, function (req, res, next) {
+    var limit = 20;
+    var offset = 0;
+    if (typeof req.query.limit !== "undefined") {
+        limit = req.query.limit;
+    }
+
+    if (typeof req.query.offset !== "undefined") {
+        offset = req.query.offset;
+    }
+
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) {
+            return res.sendStatus(401);
+        }
+        Promise.all([
+            Team.find({ $or: [{ members: user.id }, { owner: user.id }] })
+                .limit(Number(limit))
+                .skip(Number(offset))
+                .sort({ createdAt: "desc" })
+                .populate("owner")
+                .populate("members")
+                .populate("boards")
+                .exec(),
+            Team.count({ $or: [{ members: user.id }, { owner: user.id }] }),
+        ])
+            .then(function (results) {
+                var teams = results[0];
+                var teamCount = results[1];
+                // console.log(teams);
+                return res.json({
+                    teams: teams.map(function (team) {
+                        return team.toTeamJSON();
+                    }),
+                    teamCount: teamCount,
+                });
+            })
+            .catch(next);
+    });
+})
+
 router.get('/owner', auth.required, function (req, res, next) {
     var limit = 20;
     var offset = 0;
@@ -35,7 +76,7 @@ router.get('/owner', auth.required, function (req, res, next) {
         }
         console.log('HERE');
         Promise.all([
-            Team.find({ owner: user._doc._id })
+            Team.find({ owner: user.id })
                 .limit(Number(limit))
                 .skip(Number(offset))
                 .sort({ createdAt: "desc" })
@@ -77,7 +118,7 @@ router.get('/member', auth.required, function (req, res, next) {
             return res.sendStatus(401);
         }
         Promise.all([
-            Team.find({ members: user._doc._id })
+            Team.find({ members: user.id })
                 .limit(Number(limit))
                 .skip(Number(offset))
                 .sort({ createdAt: "desc" })
@@ -85,7 +126,7 @@ router.get('/member', auth.required, function (req, res, next) {
                 .populate("members")
                 .populate("boards")
                 .exec(),
-            Team.count({ members: user._doc._id }),
+            Team.count({ members: user.id }),
         ])
             .then(function (results) {
                 var teams = results[0];

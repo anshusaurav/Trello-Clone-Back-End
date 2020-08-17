@@ -38,11 +38,8 @@ ListSchema.methods.slugify = function () {
         "-" +
         ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
 };
-// ListSchema.methods.moveIssue = function(start, end){
 
-// }
 ListSchema.methods.toListJSON = function () {
-    // let mem = this.members.map(member => member.toProfileJSON());
     return {
         id: this._id,
         slug: this.slug,

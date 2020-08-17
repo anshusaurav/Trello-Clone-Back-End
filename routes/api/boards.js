@@ -178,7 +178,6 @@ router.get('/team/:slug', auth.required, function (req, res, next) {
             return res.sendStatus(401);
         }
         Team.findOne({ slug }).then(function (team) {
-            console.log(user._doc.username);
             if (!team)
                 return res.status(401).send("No such team found");
             if (!(team.isMember(user.id) || team.isOwner(user.id)))
@@ -223,9 +222,7 @@ router.get('/:slug', auth.required, function (req, res, next) {
         if (!user) {
             return res.sendStatus(401);
         }
-        console.log(user.username, slug)
         return Board.findOne({ slug }).then(function (board) {
-            console.log(board._doc);
             board.populate({
                 path: 'owner',
                 select: '-salt -__v -hash'

@@ -77,7 +77,6 @@ router.post('/user/login', function (req, res, next) {
 })
 
 router.post('/user', function (req, res, next) {
-    console.log('asdasd');
     var user = new User()
 
     user.username = req.body.user.username
