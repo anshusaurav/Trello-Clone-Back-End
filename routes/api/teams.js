@@ -283,20 +283,22 @@ router.delete("/:slug", auth.required, function (req, res, next) {
         .then(function (user) {
             Team.findOne({ slug }).then(function (team) {
                 console.log(team)
-                team.populate("owner")
-                    .populate("members")
-                    .populate("boards")
-                    .execPopulate()
-                    .then(function (team) {
-                        if (team.owner._id.toString() === user.id.toString()) {
-                            team.remove().then(function () {
+
+                if (team.isOwner(user.id)) {
+                    team.remove().then(function (team) {
+                        team.populate("owner")
+                            .populate("members")
+                            .populate("boards")
+                            .execPopulate()
+                            .then(function (team) {
                                 return res.json({ team: team.toTeamJSON() });
 
                             });
-                        } else {
-                            return res.sendStatus(403);
-                        }
                     });
+                } else {
+                    return res.sendStatus(403);
+                }
+
             });
         })
 

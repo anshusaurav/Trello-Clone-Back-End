@@ -2,7 +2,8 @@ var router = require('express').Router();
 router.use('/', require('./users'));
 router.use('/teams', require('./teams'));
 router.use('/boards', require('./boards'));
-router.use('/lists', require('./lists'))
+router.use('/lists', require('./lists'));
+router.use('/issues', require('./issues'));
 router.use(function (err, req, res, next) {
     if (err.name === 'ValidationError') {
         return res.status(422).json({

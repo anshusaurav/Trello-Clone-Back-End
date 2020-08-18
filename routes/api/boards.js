@@ -66,7 +66,7 @@ router.param("boards", function (req, res, next, slug) {
  * Board can either be added by member or  owner of team for a team
  * All users can create their personal boards.
  */
-router.post("/onlyteam", auth.required, function (req, res, next) {
+router.post("/", auth.required, function (req, res, next) {
     console.log(req.payload);
     User.findById(req.payload.id).then(function (user) {
         if (!user) {

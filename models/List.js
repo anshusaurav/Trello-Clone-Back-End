@@ -49,55 +49,77 @@ ListSchema.methods.slugify = function () {
  */
 ListSchema.methods.moveCard = function (moveFrom, moveTo) {
     if (start > this.issues.length || end > this.issues.length || start < 0 || end < 0) {
-        return this;
-    }
-    let resArr = [...this.issues];
-    removedIssue = resArr.splice(moveFrom, 1);
-    resArr.splice(moveTo, 0, removedIssue);
-    this.issues = resArr;
-    return this;
-};
+        return;
 
-
-/**
- * add a card with "issueId" at position "position" in given list. If no position 
- * is provided card will be added to the end
- * @param {*} issueId 
- * @param {*} position 
- */
-ListSchema.methods.addCard = function (issueId, position = this.issues.length) {
-    if (position < 0 || position > issues.length) {
-        return this;
-    }
-    let resArr = [...this.issues];
-    resArr.splice(position, 0, issueId);
-    this.issues = resArr;
-    return this;
-};
-
-
-/**
- * remove a card at position "position" in given list. 
- * @param {*} issueId 
- */
-ListSchema.methods.removeCard = function (position) {
-    if (position < 0 || position > issues.length) {
-        return this;
-    }
-    let resArr = [...this.issues];
-    resArr.splice(position, 1);
-    this.issues = resArr;
-    return this;
-}
-ListSchema.methods.toListJSON = function () {
-    return {
-        id: this._id,
-        slug: this.slug,
-        name: this.name,
-        board: this.board,
-        updatedAt: this.updatedAt,
-        createdAt: this.createdAt
-
+        let resArr = [...this.issues];
+        removedIssue = resArr.splice(moveFrom, 1);
+        resArr.splice(moveTo, 0, removedIssue);
+        this.issues = resArr;
+        this.save();
     };
-};
-module.exports = mongoose.model("List", ListSchema);
+
+
+    /**
+     * add a card with "issueId" at position "position" in given list. If no position 
+     * is provided card will be added to the end
+     * @param {*} issueId 
+     * @param {*} position 
+     */
+    ListSchema.methods.addCard = function (issueId, position = this.issues.length) {
+        if (position < 0 || position > issues.length) {
+            return;
+        }
+        let resArr = [...this.issues];
+        resArr.splice(position, 0, issueId);
+        this.issues = resArr;
+        this.save();
+    };
+
+
+    /**
+     * remove a card at position "position" in given list. 
+     * @param {*} issueId 
+     */
+    ListSchema.methods.removeCard = function (position) {
+        if (position < 0 || position > issues.length) {
+            return;
+        }
+        let resArr = [...this.issues];
+        resArr.splice(position, 1);
+        this.issues = resArr;
+        this.save();
+    }
+
+    /**
+     * Append card at the end of List
+     * @param {} id 
+     */
+    ListSchema.methods.appendCard = function (id) {
+        if (this.issues.indexOf(id) === -1) {
+            this.issues = this.issues.concat([id]);
+        }
+        return this.save();
+    };
+
+    /**
+     * Checks whether card with id is present in list or not
+     * @param {*} id 
+     */
+    ListSchema.methods.isCardPresent = function (id) {
+        return this.issues.some(function (issueId) {
+            return issueId.toString() === id.toString();
+        })
+    };
+
+    ListSchema.methods.toListJSON = function () {
+        return {
+            id: this._id,
+            slug: this.slug,
+            name: this.name,
+            board: this.board,
+            updatedAt: this.updatedAt,
+            createdAt: this.createdAt
+
+        };
+    };
+    module.exports = mongoose.model("List", ListSchema);
