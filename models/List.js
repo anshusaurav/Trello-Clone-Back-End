@@ -85,9 +85,10 @@ ListSchema.methods.removeCard = function (position) {
         return;
     }
     let resArr = [...this.issues];
-    resArr.splice(position, 1);
+    const ids = resArr.splice(position, 1);
     this.issues = resArr;
     this.save();
+    return ids[0];
 };
 
 /**

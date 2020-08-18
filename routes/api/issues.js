@@ -6,6 +6,7 @@ var Board = mongoose.model("Board")
 var List = mongoose.model("List")
 var Issue = mongoose.model("Issue")
 var auth = require("../auth");
+const { isNullOrUndefined } = require("util")
 router.param("issues", function (req, res, next, id) {
     Issue.findById(id)
         .then(function (issue) {
@@ -101,10 +102,13 @@ router.delete("/single/:id", auth.required, function (req, res, next) {
         }
         return List.findOne({ issues: id }).then(function (list) {
             if (!list) {
-                return res.status(401).send('No such Issue found');
+                return res.status(401).send('No such List found');
             }
             list.deleteCard(id);
             return Issue.findById(id).then(function (issue) {
+                if (!issue) {
+                    return res.status(401).send('No such Issue found');
+                }
                 issue.remove().then(function (issue) {
                     return res.json({ issue });
                 })
@@ -114,5 +118,47 @@ router.delete("/single/:id", auth.required, function (req, res, next) {
         })
     })
 })
+router.post("/swap", auth.required, function (req, res, next) {
+    var srcListId = null;
+    var destListId = null;
+    var srcPos = null;
+    var destPos = null;
+    if (typeof req.query.srcListId !== "undefined") {
+        srcListId = req.query.srcListId;
+    }
+
+    if (typeof req.query.destListId !== "undefined") {
+        destListId = req.query.destListId;
+    }
+    if (typeof req.query.srcPos !== "undefined") {
+        srcPos = req.query.srcPos;
+    }
+    if (typeof req.query.destPos !== "undefined") {
+        destPos = req.query.destPos;
+    }
+
+    if (srcListId && srcListId === destListId) {
+        List.findById(srcListId).then(function (srcList) {
+            if (!srcList) {
+                return res.status(401).send('No such source List found');
+            }
+            srcList.moveCard(srcPos, destPos);
+            return res.json({ srcList: srcList })
+
+        })
+    }
+    else {
+        List.findById(srcListId).then(function (srcList) {
+            if (!srcList) {
+                return res.status(401).send('No such source List found');
+            }
+            List.findById(destListId).then(function (destList) {
+                const issueId = srcList.removeCard(srcPos);
+                destList.addCard(issueId, destPos);
+                return res.json({ srcList: srcList })
+            })
+        })
+    }
+});
 
 module.exports = router
