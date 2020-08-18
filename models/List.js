@@ -101,6 +101,10 @@ ListSchema.methods.appendCard = function (id) {
     return this.save();
 };
 
+ListSchema.methods.deleteCard = function (id) {
+    this.issues.remove(id);
+    return this.save();
+}
 /**
  * Checks whether card with id is present in list or not
  * @param {*} id 

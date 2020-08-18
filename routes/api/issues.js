@@ -93,4 +93,26 @@ router.get("/single/:id", auth.required, function (req, res, next) {
 })
 
 
+router.delete("/single/:id", auth.required, function (req, res, next) {
+    const { id } = req.params;
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) {
+            return res.sendStatus(401);
+        }
+        return List.findOne({ issues: id }).then(function (list) {
+            if (!list) {
+                return res.status(401).send('No such Issue found');
+            }
+            list.deleteCard(id);
+            return Issue.findById(id).then(function (issue) {
+                issue.remove().then(function (issue) {
+                    return res.json({ issue });
+                })
+
+            })
+
+        })
+    })
+})
+
 module.exports = router
