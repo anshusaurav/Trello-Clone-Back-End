@@ -47,7 +47,7 @@ IssueSchema.pre("validate", function (next) {
 
 IssueSchema.methods.slugify = function () {
     this.slug =
-        slug(this.name) +
+        slug(this.title) +
         "-" +
         ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
 };
