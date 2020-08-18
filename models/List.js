@@ -79,7 +79,6 @@ ListSchema.methods.addCard = function (issueId, position = this.issues.length) {
 /**
  * remove a card at position "position" in given list. 
  * @param {*} issueId 
- * @param {*} position 
  */
 ListSchema.methods.removeCard = function (position) {
     if (position < 0 || position > issues.length) {

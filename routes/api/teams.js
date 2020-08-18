@@ -244,6 +244,39 @@ router.get("/:slug", auth.required, function (req, res, next) {
 
 });
 
+router.put("/:slug", auth.required, function (req, res, next) {
+    const { slug } = req.params;
+    Promise.resolve(req.payload ? User.findById(req.payload.id) : null)
+        .then(function (user) {
+            Team.findOne({ slug }).then(function (team) {
+                console.log(team)
+                if (typeof req.body.team.name !== 'undefined') {
+                    team.name = req.body.team.name
+                }
+                if (typeof req.body.team.image !== 'undefined') {
+                    team.image = req.body.team.image
+                }
+                if (team.isOwner(user.id)) {
+                    team.save().then(function (team) {
+                        team.populate("owner")
+                            .populate("members")
+                            .populate("boards")
+                            .execPopulate()
+                            .then(function (team) {
+                                return res.json({ team: team.toTeamJSON() });
+
+                            });
+                    });
+                } else {
+                    return res.sendStatus(403);
+                }
+
+            });
+        })
+
+        .catch(next);
+})
+
 router.delete("/:slug", auth.required, function (req, res, next) {
     const { slug } = req.params;
     Promise.resolve(req.payload ? User.findById(req.payload.id) : null)

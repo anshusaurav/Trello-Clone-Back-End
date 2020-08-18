@@ -32,7 +32,10 @@ var TeamSchema = new mongoose.Schema(
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Board'
             }
-        ]
+        ],
+        image: {
+            type: String
+        }
     },
     { timestamps: true }
 )
@@ -60,6 +63,7 @@ TeamSchema.methods.toTeamJSON = function () {
         name: this.name,
         description: this.description,
         members: mem,
+        image: this.image,
         owner: this.owner.toProfileJSON(),
         createdAt: this.createdAt,
         updatedAt: this.updatedAt,
