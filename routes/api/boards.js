@@ -87,6 +87,7 @@ router.post("/", auth.required, function (req, res, next) {
                     .then(function (team) {
                         if (team.isMember(user.id) || team.isOwner(user.id)) {
                             board.team = req.body.board.team;
+                            team.addBoard(board.id);
                             return board.save().then(function (board) {
                                 board.populate({
                                     path: 'owner',

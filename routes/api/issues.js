@@ -75,7 +75,7 @@ router.post("/:id", auth.required, function (req, res, next) {
 });
 
 /**
- * Get Single 
+ * Get Single Issue by ID
  */
 router.get("/single/:id", auth.required, function (req, res, next) {
     const { id } = req.params;
@@ -93,7 +93,9 @@ router.get("/single/:id", auth.required, function (req, res, next) {
     })
 })
 
-
+/**
+ * Delete single issue by Id
+ */
 router.delete("/single/:id", auth.required, function (req, res, next) {
     const { id } = req.params;
     User.findById(req.payload.id).then(function (user) {
@@ -118,6 +120,10 @@ router.delete("/single/:id", auth.required, function (req, res, next) {
         })
     })
 })
+
+/**
+ * Move cards b/w lists
+ */
 router.post("/swap", auth.required, function (req, res, next) {
     var srcListId = null;
     var destListId = null;
@@ -130,9 +136,11 @@ router.post("/swap", auth.required, function (req, res, next) {
     if (typeof req.query.destListId !== "undefined") {
         destListId = req.query.destListId;
     }
+
     if (typeof req.query.srcPos !== "undefined") {
         srcPos = req.query.srcPos;
     }
+
     if (typeof req.query.destPos !== "undefined") {
         destPos = req.query.destPos;
     }
@@ -142,6 +150,7 @@ router.post("/swap", auth.required, function (req, res, next) {
             if (!srcList) {
                 return res.status(401).send('No such source List found');
             }
+
             srcList.moveCard(srcPos, destPos);
             return res.json({ srcList: srcList })
 
@@ -152,6 +161,7 @@ router.post("/swap", auth.required, function (req, res, next) {
             if (!srcList) {
                 return res.status(401).send('No such source List found');
             }
+
             List.findById(destListId).then(function (destList) {
                 const issueId = srcList.removeCard(srcPos);
                 destList.addCard(issueId, destPos);

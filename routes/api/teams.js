@@ -38,18 +38,24 @@ router.get('/', auth.required, function (req, res, next) {
                 .limit(Number(limit))
                 .skip(Number(offset))
                 .sort({ createdAt: "desc" })
-                .populate("owner")
-                .populate("members")
-                .populate("boards")
+                .populate({
+                    path: 'owner members',
+                    select: '-salt -__v -hash'
+                })
+                .populate({
+                    path: 'boards',
+                    select: '-__v'
+                })
                 .exec(),
             Team.count({ $or: [{ members: user.id }, { owner: user.id }] }),
         ])
             .then(function (results) {
+                console.log(results[0])
                 var teams = results[0];
                 var teamCount = results[1];
                 return res.json({
                     teams: teams.map(function (team) {
-                        return team.toTeamJSON();
+                        return team;
                     }),
                     teamCount: teamCount,
                 });
