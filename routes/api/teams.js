@@ -47,7 +47,6 @@ router.get('/', auth.required, function (req, res, next) {
             .then(function (results) {
                 var teams = results[0];
                 var teamCount = results[1];
-                // console.log(teams);
                 return res.json({
                     teams: teams.map(function (team) {
                         return team.toTeamJSON();
@@ -74,7 +73,6 @@ router.get('/owner', auth.required, function (req, res, next) {
         if (!user) {
             return res.sendStatus(401);
         }
-        console.log('HERE');
         Promise.all([
             Team.find({ owner: user.id })
                 .limit(Number(limit))

@@ -61,11 +61,12 @@ router.param("boards", function (req, res, next, slug) {
 //             .catch(next);
 //     });
 // })
+
 /**
  * Board can either be added by member or  owner of team for a team
  * All users can create their personal boards.
  */
-router.post("/", auth.required, function (req, res, next) {
+router.post("/onlyteam", auth.required, function (req, res, next) {
     console.log(req.payload);
     User.findById(req.payload.id).then(function (user) {
         if (!user) {
@@ -78,7 +79,9 @@ router.post("/", auth.required, function (req, res, next) {
         })
         board.owner = user;
         if (!isPrivate) {
+            console.log('here');
             return Team.findById(req.body.board.team).then(function (team) {
+                console.log(team._doc.name)
                 team.populate("members")
                     .execPopulate()
                     .then(function (team) {
@@ -244,7 +247,30 @@ router.get('/:slug', auth.required, function (req, res, next) {
     }).catch(next);
 })
 
-
+router.put("/:slug", auth.required, function (req, res, next) {
+    const { slug } = req.params;
+    Promise.resolve(req.payload ? User.findById(req.payload.id) : null)
+        .then(function (user) {
+            Board.findOne({ slug }).then(function (board) {
+                if (!board)
+                    return res.status(401).send("No such board found");
+                if (typeof req.body.board.name !== 'undefined') {
+                    board.name = req.body.board.name
+                }
+                if (typeof req.body.board.image !== 'undefined') {
+                    board.image = req.body.board.image
+                }
+                if (board.owner._id.toString() === user.id.toString()) {
+                    board.save().then(function () {
+                        return res.json({ board: board._doc });
+                    });
+                } else {
+                    return res.status(401).send("You don't belong here");
+                }
+            });
+        })
+        .catch(next);
+})
 /**
  * Delete board by slug
  * 
