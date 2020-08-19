@@ -38,6 +38,12 @@ ListSchema.methods.slugify = function () {
         "-" +
         ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
 };
+
+ListSchema.methods.getCard = function (index) {
+    if (index >= this.issues.length || index < 0)
+        return;
+    return this.issues[index].id;
+}
 /**
  * Move a card inside list from moveFrom to moveTo position.
  * Consist of two steps
@@ -48,13 +54,16 @@ ListSchema.methods.slugify = function () {
  * @param {*} moveTo 
  */
 ListSchema.methods.moveCard = function (moveFrom, moveTo) {
-    if (start > this.issues.length || end > this.issues.length || start < 0 || end < 0) {
+    if (moveFrom > this.issues.length || moveTo > this.issues.length || moveFrom < 0 || moveTo < 0) {
         return;
     }
+
+    console.log('BEFORE:', this.issues);
     let resArr = [...this.issues];
     removedIssue = resArr.splice(moveFrom, 1);
     resArr.splice(moveTo, 0, removedIssue);
     this.issues = resArr;
+    console.log('AFTER:', this.issues);
     this.save();
 };
 
@@ -66,12 +75,15 @@ ListSchema.methods.moveCard = function (moveFrom, moveTo) {
  * @param {*} position 
  */
 ListSchema.methods.addCard = function (issueId, position = this.issues.length) {
-    if (position < 0 || position > issues.length) {
+    if (position < 0 || position > this.issues.length) {
         return;
     }
+    console.log('Inserting', position);
+    console.log('BEFORE:', this.issues);
     let resArr = [...this.issues];
     resArr.splice(position, 0, issueId);
     this.issues = resArr;
+    console.log('AFTER:', this.issues);
     this.save();
 };
 
@@ -81,14 +93,16 @@ ListSchema.methods.addCard = function (issueId, position = this.issues.length) {
  * @param {*} issueId 
  */
 ListSchema.methods.removeCard = function (position) {
-    if (position < 0 || position > issues.length) {
+    if (position < 0 || position > this.issues.length) {
         return;
     }
+    console.log('Removing', position);
+    console.log('BEFORE:', this.issues);
     let resArr = [...this.issues];
-    const ids = resArr.splice(position, 1);
+    resArr.splice(position, 1);
     this.issues = resArr;
+    console.log('AFTER:', this.issues);
     this.save();
-    return ids[0];
 };
 
 /**

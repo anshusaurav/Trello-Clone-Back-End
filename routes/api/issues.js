@@ -7,19 +7,19 @@ var List = mongoose.model("List")
 var Issue = mongoose.model("Issue")
 var auth = require("../auth");
 const { isNullOrUndefined } = require("util")
-router.param("issues", function (req, res, next, id) {
-    Issue.findById(id)
-        .then(function (issue) {
-            if (!issue) {
-                return res.sendStatus(404);
-            }
+// router.param("issues", function (req, res, next, id) {
+//     Issue.findById(id)
+//         .then(function (issue) {
+//             if (!issue) {
+//                 return res.sendStatus(404);
+//             }
 
-            req.issue = issue;
-            console.log("issue assigned");
-            return next();
-        })
-        .catch(next);
-});
+//             req.issue = issue;
+//             console.log("issue assigned");
+//             return next();
+//         })
+//         .catch(next);
+// });
 
 /**
  * Get all issues in param list id
@@ -144,7 +144,8 @@ router.post("/swap", auth.required, function (req, res, next) {
     if (typeof req.query.destPos !== "undefined") {
         destPos = req.query.destPos;
     }
-
+    console.log('HERE');
+    console.log(srcListId, destListId, srcPos, destPos);
     if (srcListId && srcListId === destListId) {
         List.findById(srcListId).then(function (srcList) {
             if (!srcList) {
