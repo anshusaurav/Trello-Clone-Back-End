@@ -81,7 +81,7 @@ router.post("/", auth.required, function (req, res, next) {
         if (!isPrivate) {
             console.log('here');
             return Team.findById(req.body.board.team).then(function (team) {
-                console.log(team._doc.name)
+                // console.log(team._doc.name)
                 team.populate("members")
                     .execPopulate()
                     .then(function (team) {

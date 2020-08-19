@@ -1,4 +1,4 @@
-var mongoose = require("mongoose");
+var mongoose = require("mongoose")
 var slug = require("slug")
 var uniqueValidator = require("mongoose-unique-validator");
 

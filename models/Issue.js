@@ -51,7 +51,7 @@ IssueSchema.methods.slugify = function () {
         "-" +
         ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
 };
-IssueSchema.methods.toListJSON = function () {
+IssueSchema.methods.toIssueJSON = function () {
     // let mem = this.members.map(member => member.toProfileJSON());
     return {
         id: this._id,

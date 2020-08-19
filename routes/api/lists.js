@@ -78,15 +78,7 @@ router.post("/:slug", auth.required, function (req, res, next) {
  */
 router.get("/:slug", auth.required, function (req, res, next) {
     const { slug } = req.params;
-    var limit = 20;
-    var offset = 0;
-    if (typeof req.query.limit !== "undefined") {
-        limit = req.query.limit;
-    }
 
-    if (typeof req.query.offset !== "undefined") {
-        offset = req.query.offset;
-    }
     User.findById(req.payload.id).then(function (user) {
         if (!user) {
             return res.sendStatus(401);
@@ -94,8 +86,10 @@ router.get("/:slug", auth.required, function (req, res, next) {
         return Board.findOne({ slug }).then(function (board) {
             Promise.all([
                 List.find({ board: board.id })
-                    .limit(Number(limit))
-                    .skip(Number(offset))
+                    .populate({
+                        path: 'issues',
+                        select: '-__v'
+                    })
                     .sort({ createdAt: "desc" })
                     .exec(),
                 List.count({ board: board.id }),
