@@ -29,32 +29,26 @@ router.post("/", auth.required, function (req, res, next) {
     console.log('HERE');
     console.log(srcListId, destListId, srcPos, destPos);
     if (srcListId && srcListId === destListId) {
-        console.log('Intra')
         List.findById(srcListId).then(function (srcList) {
             if (!srcList) {
                 return res.status(401).send('No such source List found');
             }
-
             srcList.moveCard(srcPos, destPos);
             return res.json({ srcList: srcList })
-
-        })
+        }).catch(next);
     }
     else {
-        console.log('Inter')
         List.findById(srcListId).then(function (srcList) {
             if (!srcList) {
                 return res.status(401).send('No such source List found');
             }
-
             List.findById(destListId).then(function (destList) {
-
                 const issueId = srcList.getCard(srcPos);
                 srcList.removeCard(srcPos);
                 destList.addCard(issueId, destPos);
                 return res.json({ srcList: srcList })
             })
-        })
+        }).catch(next);
     }
 });
 

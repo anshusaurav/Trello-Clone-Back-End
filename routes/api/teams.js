@@ -164,23 +164,43 @@ router.post("/", auth.required, function (req, res, next) {
 
     })
 });
+/**
+ * Add member to team using team's slug
+ */
 router.post("/:slug/add", auth.required, function (req, res, next) {
+    console.log('ADDING MEMBER');
     const { slug } = req.params;
     const email = req.body.user.email;
     User.findById(req.payload.id).then(function (user) {
         if (!user) {
+
             return res.sendStatus(401);
         }
         return User.findOne({ email }).then(function (userM) {
             if (!userM) {
-                return res.status(401).send(`No user with ${email}`);
+                console.log('HEREEEE')
+                return res.json({
+                    errors: {
+                        email: 'No user found with ' + email
+                    }
+                });
             }
             return Team.findOne({ slug: slug }).then(function (team) {
                 if (!team) {
                     return res.sendStatus(401);
                 }
+
                 if (user.id.toString() != team.owner.toString()) {
                     return res.sendStatus(401);
+                }
+                if (team.isOwner(userM.id) || team.isMember(userM.id)) {
+                    // console.log('HEREEEE')
+                    // console.log(team.isOwner(user.))
+                    return res.json({
+                        errors: {
+                            email: 'User with ' + email + ' already in team'
+                        }
+                    });
                 }
                 return team.addMember(userM.id).then(function (team) {
 
@@ -193,12 +213,15 @@ router.post("/:slug/add", auth.required, function (req, res, next) {
                             return res.json({ team: team.toTeamJSON() });
                         });
                 })
-            });
-        })
-    })
+            }).catch(next);
+        }).catch(next);
+    }).catch(next);
 
 });
 
+/**
+ * Removes a member from team using team slug
+ */
 router.delete("/:slug/add", auth.required, function (req, res, next) {
     const { slug } = req.params;
     const email = req.body.user.email;
@@ -242,7 +265,8 @@ router.get("/:slug", auth.required, function (req, res, next) {
                 .populate("boards")
                 .execPopulate()
                 .then(function (team) {
-                    return res.json({ team: team.toTeamJSON() });
+
+                    return res.json({ team: team });
                 });
         });
 

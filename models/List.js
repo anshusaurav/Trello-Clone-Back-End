@@ -42,7 +42,7 @@ ListSchema.methods.slugify = function () {
 ListSchema.methods.getCard = function (index) {
     if (index >= this.issues.length || index < 0)
         return;
-    return this.issues[index].id;
+    return this.issues[index]._id;
 }
 /**
  * Move a card inside list from moveFrom to moveTo position.
