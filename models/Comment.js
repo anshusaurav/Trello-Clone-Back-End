@@ -7,7 +7,7 @@ var CommentSchema = new mongoose.Schema(
             lowercase: true,
             unique: true
         },
-        title: {
+        body: {
             type: String,
             required: [true, "can't be blank"],
             index: true,
@@ -44,6 +44,7 @@ CommentSchema.methods.toIssueJSON = function () {
         slug: this.slug,
         body: this.body,
         author: this.author,
+        issue: this.issue,
         updatedAt: this.updatedAt,
         createdAt: this.createdAt
 
