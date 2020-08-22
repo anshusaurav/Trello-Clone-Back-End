@@ -136,10 +136,10 @@ router.put("/single/:id", auth.required, function (req, res, next) {
                 if (typeof req.body.issue.labels !== 'undefined') {
                     issue.labels = req.body.issue.labels
                 }
-                if (typeof req.body.team.title !== 'undefined') {
+                if (typeof req.body.issue.title !== 'undefined') {
                     issue.title = req.body.issue.title
                 }
-                if (typeof req.body.team.description !== 'undefined') {
+                if (typeof req.body.issue.description !== 'undefined') {
                     issue.description = req.body.issue.description
                 }
                 issue.save().then(function (issue) {
