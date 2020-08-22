@@ -121,55 +121,37 @@ router.delete("/single/:id", auth.required, function (req, res, next) {
     })
 })
 
-// /**
-//  * Move cards b/w lists
-//  */
-// router.post("/swap", auth.required, function (req, res, next) {
-//     var srcListId = null;
-//     var destListId = null;
-//     var srcPos = null;
-//     var destPos = null;
-//     if (typeof req.query.srcListId !== "undefined") {
-//         srcListId = req.query.srcListId;
-//     }
+//Update single Issue by id
+router.put("/single/:id", auth.required, function (req, res, next) {
+    const { id } = req.params;
+    Promise.resolve(req.payload ? User.findById(req.payload.id) : null)
+        .then(function (user) {
+            Issue.findById(id).then(function (issue) {
+                // console.log(issue)
+                if (!issue)
+                    return res.status(401).send('No such Issue found');
+                if (typeof req.body.issue.dueDate !== 'undefined') {
+                    issue.dueDate = req.body.issue.dueDate
+                }
+                if (typeof req.body.issue.labels !== 'undefined') {
+                    issue.labels = req.body.issue.labels
+                }
+                if (typeof req.body.team.title !== 'undefined') {
+                    issue.title = req.body.issue.title
+                }
+                if (typeof req.body.team.description !== 'undefined') {
+                    issue.description = req.body.issue.description
+                }
+                issue.save().then(function (issue) {
+                    return res.json({ issue });
 
-//     if (typeof req.query.destListId !== "undefined") {
-//         destListId = req.query.destListId;
-//     }
+                });
+            });
+        })
 
-//     if (typeof req.query.srcPos !== "undefined") {
-//         srcPos = req.query.srcPos;
-//     }
+        .catch(next);
+})
 
-//     if (typeof req.query.destPos !== "undefined") {
-//         destPos = req.query.destPos;
-//     }
-//     console.log('HERE');
-//     console.log(srcListId, destListId, srcPos, destPos);
-//     if (srcListId && srcListId === destListId) {
-//         List.findById(srcListId).then(function (srcList) {
-//             if (!srcList) {
-//                 return res.status(401).send('No such source List found');
-//             }
 
-//             srcList.moveCard(srcPos, destPos);
-//             return res.json({ srcList: srcList })
-
-//         })
-//     }
-//     else {
-//         List.findById(srcListId).then(function (srcList) {
-//             if (!srcList) {
-//                 return res.status(401).send('No such source List found');
-//             }
-
-//             List.findById(destListId).then(function (destList) {
-//                 const issueId = srcList.removeCard(srcPos);
-//                 destList.addCard(issueId, destPos);
-//                 return res.json({ srcList: srcList })
-//             })
-//         })
-//     }
-// });
 
 module.exports = router

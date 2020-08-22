@@ -6,6 +6,7 @@ var Team = mongoose.model("Team");
 var Board = mongoose.model("Board");
 var List = mongoose.model("List");
 var auth = require("../auth");
+const { model } = require("../../models/List");
 router.param("lists", function (req, res, next, slug) {
     List.findOne({ slug })
         .then(function (list) {
@@ -88,6 +89,22 @@ router.get("/:slug", auth.required, function (req, res, next) {
                 List.find({ board: board.id })
                     .populate({
                         path: 'issues',
+                        populate: {
+                            path: 'comments',
+                            model: 'Comment'
+                        },
+                        select: '-__v'
+                    })
+                    .populate({
+                        path: 'issues',
+                        populate: {
+                            path: 'comments',
+                            populate: {
+                                path: 'author',
+                                model: 'User',
+                                select: '-salt -__v -hash'
+                            },
+                        },
                         select: '-__v'
                     })
                     .sort({ createdAt: "desc" })
