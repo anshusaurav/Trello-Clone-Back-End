@@ -67,7 +67,6 @@ router.param("boards", function (req, res, next, slug) {
  * All users can create their personal boards.
  */
 router.post("/", auth.required, function (req, res, next) {
-    console.log(req.payload);
     User.findById(req.payload.id).then(function (user) {
         if (!user) {
             return res.sendStatus(401);
@@ -79,13 +78,11 @@ router.post("/", auth.required, function (req, res, next) {
         })
         board.owner = user;
         if (!isPrivate) {
-            console.log('here');
             return Team.findById(req.body.board.team).then(function (team) {
-                // console.log(team._doc.name)
-                team.populate("members")
-                    .execPopulate()
-                    .then(function (team) {
-                        if (team.isMember(user.id) || team.isOwner(user.id)) {
+                if (team.isMember(user.id) || team.isOwner(user.id)) {
+                    team.populate("members")
+                        .execPopulate()
+                        .then(function (team) {
                             board.team = req.body.board.team;
                             team.addBoard(board.id);
                             return board.save().then(function (board) {
@@ -106,11 +103,11 @@ router.post("/", auth.required, function (req, res, next) {
                                         return res.json({ board: board._doc })
                                     })
                             })
-                        }
-                        return res.status(401).send("You don't belong here");
+                        })
+                } else
+                    return res.status(401).send("You don't belong here");
 
-                    })
-            })
+            });
         }
         else {
             return board.save().then(function () {

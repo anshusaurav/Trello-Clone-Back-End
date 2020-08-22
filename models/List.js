@@ -58,12 +58,10 @@ ListSchema.methods.moveCard = function (moveFrom, moveTo) {
         return;
     }
 
-    console.log('BEFORE:', this.issues);
     let resArr = [...this.issues];
     removedIssue = resArr.splice(moveFrom, 1);
     resArr.splice(moveTo, 0, removedIssue);
     this.issues = resArr;
-    console.log('AFTER:', this.issues);
     this.save();
 };
 
@@ -78,12 +76,9 @@ ListSchema.methods.addCard = function (issueId, position = this.issues.length) {
     if (position < 0 || position > this.issues.length) {
         return;
     }
-    console.log('Inserting', position);
-    console.log('BEFORE:', this.issues);
     let resArr = [...this.issues];
     resArr.splice(position, 0, issueId);
     this.issues = resArr;
-    console.log('AFTER:', this.issues);
     this.save();
 };
 
@@ -96,12 +91,9 @@ ListSchema.methods.removeCard = function (position) {
     if (position < 0 || position > this.issues.length) {
         return;
     }
-    console.log('Removing', position);
-    console.log('BEFORE:', this.issues);
     let resArr = [...this.issues];
     resArr.splice(position, 1);
     this.issues = resArr;
-    console.log('AFTER:', this.issues);
     this.save();
 };
 

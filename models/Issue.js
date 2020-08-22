@@ -18,6 +18,10 @@ var IssueSchema = new mongoose.Schema(
         labels: [{
             type: String
         }],
+        comments: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Comment"
+        }],
         dueDate: {
             type: Date,
             default: Date.now
@@ -51,6 +55,26 @@ IssueSchema.methods.slugify = function () {
         "-" +
         ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
 };
+IssueSchema.methods.addComment = function (id) {
+    if (this.comments.indexOf(id) === -1) {
+        this.comments = this.comments.concat([id]);
+    }
+    return this.save();
+};
+
+IssueSchema.methods.deleteComment = function (id) {
+    this.comments.remove(id);
+    return this.save();
+}
+/**
+ * Checks whether card with id is present in list or not
+ * @param {*} id 
+ */
+IssueSchema.methods.isCommentPresent = function (id) {
+    return this.comments.some(function (commentId) {
+        return commentId.toString() === id.toString();
+    })
+};
 IssueSchema.methods.toIssueJSON = function () {
     // let mem = this.members.map(member => member.toProfileJSON());
     return {
@@ -59,6 +83,7 @@ IssueSchema.methods.toIssueJSON = function () {
         title: this.title,
         desctiption: this.description,
         labels: this.labels,
+        comments: this.comments,
         dueDate: this.dueDate,
         members: this.members,
         isComplete: this.isComplete,

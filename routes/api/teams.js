@@ -190,12 +190,10 @@ router.post("/:slug/add", auth.required, function (req, res, next) {
                     return res.sendStatus(401);
                 }
 
-                if (user.id.toString() != team.owner.toString()) {
-                    return res.sendStatus(401);
-                }
+                // if (user.id.toString() != team.owner.toString()) {
+                //     return res.sendStatus(401);
+                // }
                 if (team.isOwner(userM.id) || team.isMember(userM.id)) {
-                    // console.log('HEREEEE')
-                    // console.log(team.isOwner(user.))
                     return res.json({
                         errors: {
                             email: 'User with ' + email + ' already in team'
@@ -234,8 +232,12 @@ router.delete("/:slug/add", auth.required, function (req, res, next) {
                 if (!team) {
                     return res.sendStatus(401);
                 }
-                if (user.id.toString() != team.owner.toString()) {
-                    return res.sendStatus(401);
+                if (!team.isOwner(user.id)) {
+                    return res.json({
+                        errors: {
+                            email: 'Only Admin can remove member'
+                        }
+                    });
                 }
                 return team.removeMember(userM.id).then(function (team) {
                     team.populate("owner")
@@ -285,6 +287,9 @@ router.put("/:slug", auth.required, function (req, res, next) {
                 }
                 if (typeof req.body.team.image !== 'undefined') {
                     team.image = req.body.team.image
+                }
+                if (typeof req.body.team.description !== 'undefined') {
+                    team.description = req.body.team.description
                 }
                 if (team.isOwner(user.id)) {
                     team.save().then(function (team) {
