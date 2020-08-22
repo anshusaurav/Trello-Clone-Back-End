@@ -152,6 +152,48 @@ router.put("/single/:id", auth.required, function (req, res, next) {
         .catch(next);
 })
 
+router.post("/labels/:id", auth.required, function (req, res, next) {
+    const { id } = req.params;
+    Promise.resolve(req.payload ? User.findById(req.payload.id) : null)
+        .then(function (user) {
+            Issue.findById(id).then(function (issue) {
+                // console.log(issue)
+                if (!issue)
+                    return res.status(401).send('No such Issue found');
+                if (typeof req.body.issue.label !== 'undefined') {
+                    issue.addLabel(req.body.issue.label);
+                }
+                issue.save().then(function (issue) {
+                    return res.json({ issue });
+
+                });
+            });
+        })
+
+        .catch(next);
+})
+
+
+router.delete("/labels/:id", auth.required, function (req, res, next) {
+    const { id } = req.params;
+    Promise.resolve(req.payload ? User.findById(req.payload.id) : null)
+        .then(function (user) {
+            Issue.findById(id).then(function (issue) {
+                // console.log(issue)
+                if (!issue)
+                    return res.status(401).send('No such Issue found');
+                if (typeof req.body.issue.label !== 'undefined') {
+                    issue.deleteLabel(req.body.issue.label);
+                }
+                issue.save().then(function (issue) {
+                    return res.json({ issue });
+
+                });
+            });
+        })
+
+        .catch(next);
+})
 
 
 module.exports = router

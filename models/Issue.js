@@ -67,12 +67,32 @@ IssueSchema.methods.deleteComment = function (id) {
     return this.save();
 }
 /**
- * Checks whether card with id is present in list or not
+ * Checks whether comment with id is present in issue or not
  * @param {*} id 
  */
 IssueSchema.methods.isCommentPresent = function (id) {
     return this.comments.some(function (commentId) {
         return commentId.toString() === id.toString();
+    })
+};
+
+IssueSchema.methods.addLabel = function (label) {
+    if (this.labels.indexOf(label.toLowerCase()) === -1) {
+        this.labels = this.labels.concat([label.toLowerCase()]);
+    }
+};
+
+IssueSchema.methods.deleteLabel = function (label) {
+    this.labels.remove(label.toLowerCase());
+
+}
+/**
+ * Checks whether label in card
+ * @param {*} label 
+ */
+IssueSchema.methods.isLabelPresent = function (label) {
+    return this.labels.some(function (labelI) {
+        return labelI === label;
     })
 };
 IssueSchema.methods.toIssueJSON = function () {
