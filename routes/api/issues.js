@@ -131,7 +131,10 @@ router.put("/single/:id", auth.required, function (req, res, next) {
                 if (!issue)
                     return res.status(401).send('No such Issue found');
                 if (typeof req.body.issue.dueDate !== 'undefined') {
-                    issue.dueDate = req.body.issue.dueDate
+                    if (req.body.issue.dueDate === null)
+                        issue.dueDate = null;
+                    else
+                        issue.dueDate = req.body.issue.dueDate
                 }
                 if (typeof req.body.issue.labels !== 'undefined') {
                     issue.labels = req.body.issue.labels

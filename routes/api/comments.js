@@ -19,11 +19,19 @@ router.get("/:id", auth.required, function (req, res, next) {
             issue.populate({
                 path: 'comments',
                 select: '-__v'
+
+            }).populate({
+                path: 'comments',
+                populate: {
+                    path: 'author',
+                    select: '-salt -__v -hash'
+                },
+                select: '-__v'
             })
                 .execPopulate()
                 .then(function (issue) {
                     return res.json({
-                        issues: issue.comments.map(function (comment) {
+                        comments: issue.comments.map(function (comment) {
                             return comment;
                         }),
                     });
@@ -89,10 +97,11 @@ router.delete("/single/:id", auth.required, function (req, res, next) {
             return res.sendStatus(401);
         }
         return Issue.findOne({ comments: id }).then(function (issue) {
+            console.log('issue: ', issue._doc.title)
             if (!issue) {
                 return res.status(401).send('This comments is not found in any issues');
             }
-            issue.removeComment(id);
+            issue.deleteComment(id);
             return Comment.findById(id).then(function (comment) {
                 if (!comment) {
                     return res.status(401).send('No such Comment found');
