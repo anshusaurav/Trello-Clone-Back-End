@@ -34,29 +34,22 @@ if (!isProduction) {
     app.use(errorhandler())
 }
 
-if (isProduction) {
-    console.log('PRod');
-    mongoose.connect(process.env.MONGODB_URI)
-} else {
-    // console.log('Dev')
-    // mongoose.connect("mongodb://localhost/trelloDB", { useNewUrlParser: true });
-    // mongodb+srv://anshu:anshu@cluster0.qcfnf.mongodb.net/trelloDB?retryWrites=true&w=majority
-    mongoose.connect("mongodb+srv://anshu:anshu@cluster0.qcfnf.mongodb.net/trelloDB?retryWrites=true&w=majority", {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    }, function (err, db) {
-        if (err) {
-            console.log(err);
-        }
-        else {
-            console.log('connected to ' + "mongodb://localhost:27017/trelloDB");
-            mongoose.set('debug', true)
-            // db.close();
-        }
-    })
+mongoose.connect("mongodb+srv://anshu:anshu@cluster0.qcfnf.mongodb.net/trelloDB?retryWrites=true&w=majority", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}, function (err, db) {
+    if (err) {
+        console.log(err);
+    }
+    else {
+        console.log('connected to ' + "mongodb://localhost:27017/trelloDB");
+        mongoose.set('debug', true)
+        // db.close();
+    }
+})
 
-    mongoose.set('debug', true)
-}
+mongoose.set('debug', true)
+
 
 require('./models/User');
 require('./models/Team');
