@@ -40,7 +40,8 @@ if (isProduction) {
 } else {
     // console.log('Dev')
     // mongoose.connect("mongodb://localhost/trelloDB", { useNewUrlParser: true });
-    mongoose.connect("mongodb://localhost:27017/trelloDB", {
+    // mongodb+srv://anshu:anshu@cluster0.qcfnf.mongodb.net/trelloDB?retryWrites=true&w=majority
+    mongoose.connect("mongodb+srv://anshu:anshu@cluster0.qcfnf.mongodb.net/trelloDB?retryWrites=true&w=majority", {
         useNewUrlParser: true,
         useUnifiedTopology: true
     }, function (err, db) {
