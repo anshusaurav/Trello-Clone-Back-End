@@ -298,4 +298,67 @@ router.delete('/single/:slug', auth.required, function (req, res, next) {
         })
     }).catch(next);
 })
+/**
+ * Delete single list by slug
+ */
+router.delete('/deleteCards/:slug', auth.required, function (req, res, next) {
+    const { slug } = req.params;
+    User.findById(req.payload.id).then(function (user) {
+        if (!user) {
+            return res.sendStatus(401);
+        }
+        return List.findOne({ slug }).then(function (list) {
+            if (!list)
+                return res.status(401).send('No such list found');
+            list.populate({
+                path: 'board',
+                select: '-__v',
+            }).populate({
+                path: 'issues',
+                select: '-__v'
+            })
+                .execPopulate()
+                .then(function (list) {
+                    if (list.board.isPrivate) {
+
+                        return Board.findOne({ slug: list.board.slug }).then(function (board) {
+                            if (board.isOwner(user.id)) {
+                                // return list.remove().then(function (list) {
+                                //     board.removeList(list.id)
+                                //     return res.json({ list: list._doc })
+
+                                // })
+                                list.issues = [];
+                                return list.save().then(function (list) {
+                                    return res.json({ list })
+                                })
+                            }
+                            else {
+                                return res.status(401).send('You dont belong here');
+                            }
+                        })
+
+                    }
+                    else {
+                        return Board.findOne({ slug: list.board.slug }).then(function (board) {
+                            if (!board)
+                                return res.status(401).send('No such board found');
+                            return Team.findById(board.team).then(function (team) {
+                                if (team.isOwner(user._id) || team.isMember(user._id)) {
+                                    list.issues = [];
+                                    return list.save().then(function (list) {
+                                        return res.json({ list })
+                                    })
+                                }
+                                else {
+                                    return res.status(401).send('You dont belong here');
+                                }
+                            })
+                        })
+                    }
+
+                });
+        })
+    }).catch(next);
+})
 module.exports = router

@@ -42,7 +42,7 @@ mongoose.connect("mongodb+srv://anshu:anshu@cluster0.qcfnf.mongodb.net/trelloDB?
         console.log(err);
     }
     else {
-        console.log('connected to ' + "mongodb://localhost:27017/trelloDB");
+        console.log('connected to ' + "mDB");
         mongoose.set('debug', true)
         // db.close();
     }
